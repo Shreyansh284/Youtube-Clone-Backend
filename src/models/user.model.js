@@ -1,5 +1,7 @@
 import { type } from "express/lib/response";
 import mongoose,{Schema}  from "mongoose";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const userSchema=new Schema({
         username:{
@@ -55,6 +57,7 @@ userSchema.pre("save",async function(next){
 })
 
 userSchema.methods.isPasswordCorrect=async function (password) {
+
    return await bcrypt.compare(password,this.password)
 }
 
