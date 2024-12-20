@@ -10,7 +10,7 @@ import fs from "fs"
     });
 
 
-    const uploadCloudinary=async(localFilePath)=>{
+    const uploadOnCloudinary=async(localFilePath)=>{
         try{
             if(!localFilePath)return null
             // upload
@@ -18,7 +18,8 @@ import fs from "fs"
                 resource_type: "auto",
             })
             // file uploaded
-            console.log("File Uploaded",response.url)
+            // console.log("File Uploaded",response.url)
+            fs.unlinkSync(localFilePath)
             return response
         }
         catch(error)
@@ -27,4 +28,6 @@ import fs from "fs"
             return null
         }
     }
+
+    export {uploadOnCloudinary}
 
