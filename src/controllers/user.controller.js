@@ -33,8 +33,8 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User already exists");
   }
 
-  //   const avtarLocalPath=req.files?.avatar[0]?.path;
-  let avtarLocalPath;
+// let avtarLocalPath=req.files.avatar[0].path||"abc";
+   let avtarLocalPath;
   if (
     req.files &&
     Array.isArray(req.files.avatar) &&
@@ -138,23 +138,26 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
-  if (incomingRefreshToken) {
+    console.log(incomingRefreshToken)
+  if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized Token");
-  }
+}
+try{
   const decodedToken = jwt.verify(
     incomingRefreshToken,
-    process.env.ACCESS_TOKEN_SECRET
+    process.env.REFRESH_TOKEN_SECRET
   );
 
   const user = await User.findById(decodedToken?._id);
 
-  if (user) {
+  if (!user) {
     throw new ApiError(401, "Invalid Refresh Token");
   }
   if (incomingRefreshToken !== user?.refreshToken) {
     throw new ApiError(401, "Refresh token is expired");
   }
-try{
+
+
   const options = { httpOnly: true, secure: true };
   const {accessToken,newrefreshToken}=await  generateAccessAndRefreshToken(user._id)
 
