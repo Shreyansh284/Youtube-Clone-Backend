@@ -182,6 +182,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
+  
   const user = await User.findById(req.user?._id);
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
@@ -221,11 +222,17 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avtarLocalPath = req.file?.path;
-  if (!avtarLocalPath) {
+  const avatarLocalPath = req.file?.path;
+//   let avatarLocalPath;
+//   if (req.file) {
+//     avatarLocalPath = req.file.path;
+//   }
+
+  console.log(avatarLocalPath)
+  if (!avatarLocalPath) {
     throw new ApiError(400, "Please upload a valid image");
   }
-  const avatar = await uploadOnCloudinary(avtarLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
     throw new ApiError(400, "Failed to upload image");
@@ -239,7 +246,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
-  return res.status(200).json(200, user, "Avatar Updated");
+    console.log(user);   
+  return res.status(200).json(new ApiResponse(200, user, "Avatar Updated"));
 });
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverLocalPath = req.file?.path;
@@ -260,7 +268,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
-  return res.status(200).json(200, user, "Cover Image Updated");
+  return res.status(200).json(new ApiResponse(200, user, "Cover Image Updated"));
 });
 
 export {

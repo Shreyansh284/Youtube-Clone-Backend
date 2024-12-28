@@ -10,5 +10,5 @@ channel:{
     ref:"Users"
 },
 },{timestamps  :true})
-
+    
 export const Subscription=mongoose.model('Subscription',subscriptionSchema);
