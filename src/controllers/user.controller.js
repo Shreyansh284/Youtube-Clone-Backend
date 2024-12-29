@@ -203,6 +203,7 @@ const getCurrentUser = asyncHandler(async (res, req) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullname, email } = req.body;
+  console.log(fullname,email)
   if (!fullname || !email) {
     throw new ApiError(400, "Please fill all fields");
   }
@@ -274,8 +275,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Cover Image Updated"));
 });
 
-const getUserChannelProfile = asyncHandler(async (res, req) => {
+const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
+
   if (!username?.trim()) {
     throw new ApiError(400, "Please enter a valid username");
   }
@@ -293,12 +295,16 @@ const getUserChannelProfile = asyncHandler(async (res, req) => {
         foreignField: "channel",
         as: "subscribers",
       },
+    },
+    {
       $lookup: {
         from: "subscriptions",
         localField: "_id",
-        foreignField: "subscribers",
+        foreignField: "subscriber",
         as: "subscribedTo",
       },
+    },
+    {
       $addFields: {
         subscriberCount: {
           $size: "$subscribers",
@@ -306,38 +312,40 @@ const getUserChannelProfile = asyncHandler(async (res, req) => {
         channelsSubscribedToCount: {
           $size: "$subscribedTo",
         },
-        isSubscribed:{
-          $cond:{
-            if:{$in:[req.user?._id,"$subscribers.subscriber"]},
-            then:true,
-            else:false
-          }
-        }
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
       },
     },
     {
       $project: {
-        fullname:1,
-        username:1,
-        subscriberCount:1,
-        channelsSubscribedToCount:1,
-        isSubscribed:1,
-        avatar:1,
-        coverImage:1,
-        email:1,
-        },
-    }
+        fullname: 1,
+        username: 1,
+        subscriberCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+      },
+    },
   ]);
-  if(!channel?.length)
-  {
-    throw new ApiError(404,"channel does not exists")
+
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel does not exist");
   }
+
   return res
-  .status(200)
-  .json(
-    new ApiResponse(200,channel[0],"User channel fetched successfully")
-  )
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully")
+    );
 });
+
 
 const getWatchHistory=asyncHandler(async(req,res)=>{
   const user=
