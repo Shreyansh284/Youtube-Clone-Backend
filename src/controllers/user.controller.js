@@ -125,7 +125,9 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
-    { $set: { refreshToken: undefined } },
+    { $unset:{
+      refreshToken:1
+    } },
     {
       new: true,
     }
@@ -197,8 +199,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password Chnge Successfully"));
 });
 
-const getCurrentUser = asyncHandler(async (res, req) => {
-  return res.status(200).json(200, req.user, "Current User feteched");
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+  .status(200).json(new ApiResponse(200, req.user, "Current User feteched"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -374,6 +377,7 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
                   fullname:1,
                   username:1,
                   avatar:1
+
                 }
               }
               ]
@@ -384,6 +388,11 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
               owner:{
                 $first:"$owner"
               }
+            }
+          },
+          {
+            $project:{
+              watchHistory:1
             }
           }
         ]
