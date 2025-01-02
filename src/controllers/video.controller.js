@@ -14,7 +14,47 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
-    // TODO: get video, upload to cloudinary, create video
+    if (
+        [ title, description].some((field) => field?.trim() === "")
+      ) {
+        throw new ApiError(400, "All fields are required");
+      }
+      let videoLocalPath;
+      if (
+        req.files &&
+        Array.isArray(req.files.videoFile) &&
+        req.files.videoFile.length > 0
+      ) {
+        videoLocalPath = req.files.videoFile[0].path;
+      }
+      let thumbnailLocalPath;
+      if (
+        req.files &&
+        Array.isArray(req.files.thumbnail) &&
+        req.files.thumbnail.length > 0
+      ) {
+        thumbnailLocalPath = req.files.thumbnail[0].path;
+      }
+
+      if (!videoLocalPath) {
+        throw new ApiError(400, "Video file required");
+      }
+      if (!thumbnailLocalPath) {
+        throw new ApiError(400, "thumbnail file required");
+      }
+      const videoFile =await uploadOnCloudinary(videoLocalPath);
+      const thumbnail =await uploadOnCloudinary(thumbnailLocalPath);
+      const duration=videoFile.duration;
+      console.log(duration)
+      const video = await Video.create({
+          videoFile:videoFile.url,
+         thumbnail: thumbnail.url,
+        title,
+        description,
+        duration,
+        owner:req.user._id,
+})
+res.status(201).json({ message: "Video published successfully" });
 })
 
 const getVideoById = asyncHandler(async (req, res) => {
@@ -37,7 +77,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 })
 
-export {
+export  {
     getAllVideos,
     publishAVideo,
     getVideoById,
