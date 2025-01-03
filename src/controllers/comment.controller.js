@@ -39,14 +39,21 @@ const updateComment = asyncHandler(async (req, res) => {
   if (!isValidObjectId(commentId)) {
     throw new ApiError(400, "Invalid comment id");
   }
-  const comment = await Comment.findByIdAndUpdate(
+  const comment = await Comment.findById(commentId);
+  if(!comment)
+    {
+        throw new ApiError(404, "Comment not found");
+    }
+  if(comment.owner.toString()!=req.user._id)
+  {
+    throw new ApiError(403, "You are not the owner of this comment");
+  }
+  await Comment.findByIdAndUpdate(
     commentId,
     { content },
     { new: true }
   );
-  if (!comment) {
-    throw new ApiError(404, "Comment not found");
-  }
+
   return res
     .status(201)
     .json(new ApiResponse(200, "Comment updated successfully"));
@@ -55,10 +62,19 @@ const updateComment = asyncHandler(async (req, res) => {
 const deleteComment = asyncHandler(async (req, res) => {
   // TODO: delete a comment
   const { commentId } = req.params;
-  const comment = await Comment.findByIdAndDelete(commentId);
-  if (!comment) {
-    throw new ApiError(404, "Comment not found");
-  }
+  if (!isValidObjectId(commentId)) {
+    throw new ApiError(400, "Invalid comment id");
+    }
+    const comment = await Comment.findById(commentId);
+    if(!comment)
+    {
+        throw new ApiError(404, "Comment not found");
+    }
+    if(comment.owner.toString()!=req.user._id)
+    {
+      throw new ApiError(403, "You are not the owner of this comment");
+    }
+   await Comment.findByIdAndDelete(commentId);
   return res
     .status(201)
     .json(new ApiResponse(200, "Comment deleted successfully"));
