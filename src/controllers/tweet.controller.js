@@ -46,6 +46,14 @@ const updateTweet = asyncHandler(async (req, res) => {
       ) {
         throw new ApiError(400, " field is required");
       }
+      const tweet=await Tweet.findById(tweetId)
+      if (!tweet) {
+        throw new ApiError(404, "Tweet Not Found");
+        }
+        if(tweet.owner.toString()!=req.user._id)
+        {
+          throw new ApiError(403, "You are not the owner of this tweet");
+        }
       const updatedTweet = await Tweet.findByIdAndUpdate(tweetId, {content}, {new:true})
     
       return res
@@ -56,7 +64,14 @@ const updateTweet = asyncHandler(async (req, res) => {
 
 const deleteTweet = asyncHandler(async (req, res) => {
     const tweetId=req.params.tweetId
-
+    const tweet=await Tweet.findById(tweetId)
+    if (!tweet) {
+      throw new ApiError(404, "Tweet Not Found");
+      }
+      if(tweet.owner.toString()!=req.user._id)
+      {
+        throw new ApiError(403, "You are not the owner of this tweet");
+      }
     const deletedTweet = await Tweet.findByIdAndDelete(tweetId)
 
     return res
