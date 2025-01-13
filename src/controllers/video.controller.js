@@ -144,6 +144,28 @@ const getVideoById = asyncHandler(async (req, res) => {
 return  res.status(201).json(new ApiResponse(201, video, "Video found successfully"));
 });
 
+const addVideoToWatchlater=asyncHandler(async(req,res)=>{
+  const{videoId}=req.params
+  const video=await Video.findById(videoId)
+  if(!video)
+    {
+      throw new ApiError(404, "Video not found");
+      }
+      const user=await User.findById(req.user._id)
+      if(!user.watchLater.includes(videoId))
+      {
+        user.watchLater.push(videoId)
+        await user.save()
+        return res.status(201).json(new ApiResponse(201, video, "Video added to watchlist"))
+      }
+      else
+      {
+        user.watchLater=user.watchLater.filter(id=>id!=videoId)
+        await user.save()
+        return res.status(201).json(new ApiResponse(201, video, "Video Removed to watchlist"))
+      }
+
+})
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const video = await Video.findById(videoId);
@@ -224,4 +246,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  addVideoToWatchlater
 };

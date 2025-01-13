@@ -6,6 +6,7 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
+    addVideoToWatchlater,
 } from "../controllers/video.controller.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
@@ -26,7 +27,7 @@ router
                 name: "thumbnail",
                 maxCount: 1,
             },
-            
+                
         ]),
         publishAVideo
     );
@@ -34,9 +35,10 @@ router
 router
     .route("/:videoId")
     .get(getVideoById)
+
     .delete(deleteVideo)
     .patch(upload.single("thumbnail"), updateVideo);
-    
+router.route("/watchLater/:videoId").post(addVideoToWatchlater)
 router.route("/").get(getAllVideos)
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 

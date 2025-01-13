@@ -42,6 +42,13 @@ const userSchema=new Schema({
                 ref:"Video"
             }
         ],
+        watchLater:[
+
+            {
+                type:Schema.Types.ObjectId,
+                ref:"Video"
+            }
+        ],
         password:{
             type:String,
             required:[true,'Password is Required']
