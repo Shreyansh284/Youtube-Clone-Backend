@@ -125,9 +125,11 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
-    { $unset:{
-      refreshToken:1
-    } },
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
     {
       new: true,
     }
@@ -201,12 +203,13 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
-  .status(200).json(new ApiResponse(200, req.user, "Current User feteched"));
+    .status(200)
+    .json(new ApiResponse(200, req.user, "Current User feteched"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullname, email } = req.body;
-  console.log(fullname,email)
+  console.log(fullname, email);
   if (!fullname || !email) {
     throw new ApiError(400, "Please fill all fields");
   }
@@ -349,8 +352,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
-
-const getWatchHistory=asyncHandler(async(req,res)=>{
+const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
       $match: {
@@ -393,11 +395,34 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
     },
   ]);
   return res
-  .status(200)
-  .json(new ApiResponse(200,user[0],"User watch history fetched successfully"))
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0], "User watch history fetched successfully")
+    );
+});
+const removeWatchHistory = asyncHandler(async (req, res) => {
+  const videoId = req.params.videoId;
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $pull: { watchHistory: videoId } },
+    { new: true }
+  ).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "user Not Found");
+  }
 
-})
-const getWatchLater=asyncHandler(async(req,res)=>{
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user,
+        "Video removed from watch history successfully"
+      )
+    );
+});
+
+const getWatchLater = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
       $match: {
@@ -440,10 +465,11 @@ const getWatchLater=asyncHandler(async(req,res)=>{
     },
   ]);
   return res
-  .status(200)
-  .json(new ApiResponse(200,user[0],"User Watch Later fetched successfully"))
-
-})
+    .status(200)
+    .json(
+      new ApiResponse(200, user[0], "User Watch Later fetched successfully")
+    );
+});
 
 export {
   registerUser,
@@ -457,5 +483,6 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
-  getWatchLater
+  getWatchLater,
+  removeWatchHistory,
 };
